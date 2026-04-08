@@ -1,5 +1,7 @@
 import { useFormik } from "formik";
-import React, { useEffect, useState } from "react";
+import React, { createContext, useCallback, useEffect, useState } from "react";
+
+import InfoCard from "./Comps/InfoCard";
 
 import {
   Select,
@@ -12,7 +14,13 @@ import {
 } from "@/components/ui/select";
 import { Button } from "./components/ui/button";
 
-import { BadgeCheck, DeleteIcon, Edit, MoreHorizontalIcon } from "lucide-react";
+import {
+  BadgeCheck,
+  DeleteIcon,
+  Edit,
+  InfoIcon,
+  MoreHorizontalIcon,
+} from "lucide-react";
 
 import {
   DropdownMenu,
@@ -68,8 +76,12 @@ interface UserObj {
 
 const api = "http://localhost:3000/users";
 
+export const UserContxt = createContext();
+
 const App = () => {
   const [users, setUsers] = useState<UserObj[]>([]);
+
+  const [userObj, setUserObj] = useState<UserObj | null>();
 
   const [statusF, setStatusF] = useState("all");
   const [inpS, setinpS] = useState("");
@@ -140,7 +152,7 @@ const App = () => {
   function handleChangeStatus(e: string) {
     setStatusF(e);
 
-    sData("status", e);
+    sData("status_like", e !== "all" ? e : "");
   }
 
   function handleChangeInp(e) {
@@ -248,8 +260,22 @@ const App = () => {
     },
   });
 
+  // info modal
+
+  const [openInfo, setOpenInfo] = useState(false);
+
+  function handleOpenInfo(elem: UserObj) {
+    setOpenInfo(true);
+
+    setUserObj(elem);
+  }
+
+  const handleCloseInfo = () => {
+    setOpenInfo(false);
+  };
+
   return (
-    <div>
+    <UserContxt.Provider value={userObj}>
       <div className="header flex items-center justify-between p-[10px_20px] border-b">
         <div className="flex gap-3 items-center">
           <input
@@ -334,6 +360,16 @@ const App = () => {
                           <BadgeCheck />
                           <span>checked</span>
                         </DropdownMenuItem>
+
+                        <DropdownMenuSeparator />
+
+                        <DropdownMenuItem
+                          onClick={() => handleOpenInfo(e)}
+                          variant="destructive"
+                        >
+                          <InfoIcon />
+                          <span>Info</span>
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -402,7 +438,6 @@ const App = () => {
         </DialogContent>
       </Dialog>
 
-      {/* here */}
       {/* edit modal */}
       <Dialog open={openEdit} onOpenChange={setOpenEdit}>
         <DialogContent className="sm:max-w-sm">
@@ -442,7 +477,24 @@ const App = () => {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+      {/* info modal */}
+      <Dialog open={openInfo} onOpenChange={setOpenInfo}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Info User</DialogTitle>
+            <DialogDescription></DialogDescription>
+          </DialogHeader>
+          <InfoCard />
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button onClick={handleCloseInfo} variant="outline">
+                OK
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </UserContxt.Provider>
   );
 };
 
