@@ -13,6 +13,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import Menu from "@/Compos/Menu";
+
 import {
   Select,
   SelectContent,
@@ -33,8 +35,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-import Menu from "@/Compos/Menu";
 
 import { useUser } from "@/Store/useUser";
 import { Button } from "@/components/ui/button";
@@ -136,7 +136,6 @@ const Home = () => {
     },
     validationSchema: userSchemaEdit,
     onSubmit: (val) => {
-      // putData(val);
       usersData.putData(val);
       handleCloseEdit();
     },

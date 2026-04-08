@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUser } from "@/Store/useUser";
+import { useNavigate } from "react-router";
 
 interface imgObj {
   id: number;
@@ -45,7 +46,10 @@ const Menu = ({
   btnEdit,
 }: genObj) => {
   const usersData = useUser((state) => state);
+
   const obj = { id: id, name: name, description: description };
+
+  const navigate = useNavigate();
 
   return (
     <DropdownMenu>
@@ -55,7 +59,7 @@ const Menu = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate(`info/${id}`)}>
           <UserIcon />
           Info
         </DropdownMenuItem>
