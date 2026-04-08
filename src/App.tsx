@@ -1,22 +1,23 @@
 import React from "react";
-import { useCnt } from "./Store/useCnt";
+import { createBrowserRouter, RouterProvider } from "react-router";
+
+const Home = React.lazy(() => import("./Pages/Home"));
+const InfoId = React.lazy(() => import("./Pages/InfoId"));
+const Layout = React.lazy(() => import("./Layout/Layout"));
 
 const App = () => {
-  const cnt = useCnt((store) => store);
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <Layout />,
+      children: [
+        { index: true, element: <Home /> },
+        { path: "info/:id", element: <InfoId /> },
+      ],
+    },
+  ]);
 
-  return (
-    <div>
-      <div>cnt: {cnt.counter}</div>
-      <div className="flex">
-        <button onClick={cnt.increment} className="border">
-          +
-        </button>
-        <button onClick={cnt.decrement} className="border">
-          -
-        </button>
-      </div>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 };
 
 export default App;
