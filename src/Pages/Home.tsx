@@ -99,8 +99,6 @@ const Home = () => {
     validationSchema: userSchema,
 
     onSubmit: (values: any, { resetForm }) => {
-      console.log(values);
-
       const formData = new FormData();
       formData.append("Name", values.Name.trim());
       formData.append("Description", values.Description.trim());

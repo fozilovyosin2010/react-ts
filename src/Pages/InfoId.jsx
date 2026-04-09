@@ -61,7 +61,7 @@ const InfoId = () => {
   };
   const postById = async (imgObj) => {
     try {
-      await axios.delete(`${api}/api/to-dos/${id}/images`, obj);
+      await axios.post(`${api}/api/to-dos/${id}/images`, imgObj);
       getById();
     } catch (error) {
       console.error(error);
@@ -72,17 +72,6 @@ const InfoId = () => {
     getById();
   }, []);
 
-  const formikAddImg = useFormik({
-    initialValues: {
-      Images: null,
-    },
-
-    onSubmit: (val) => {
-      // postById(val);
-      console.log(val);
-    },
-  });
-
   // add modal
 
   const [openAdd, setOpenAdd] = useState(false);
@@ -92,6 +81,17 @@ const InfoId = () => {
   }
   function handleCloseAdd() {
     setOpenAdd(false);
+  }
+
+  function handleSubmitAdd(e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("Images", e.target["Images"].files[0]);
+
+    postById(formData);
+
+    handleCloseAdd();
   }
 
   return (
@@ -126,7 +126,6 @@ const InfoId = () => {
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Image</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -140,25 +139,13 @@ const InfoId = () => {
                   {user && user?.isCompleted ? "ACTIVE" : "INACTIVE"}
                 </span>
               </TableCell>
-
-              <TableCell>
-                {user?.images.map((img) => {
-                  return (
-                    <img
-                      className="w-[300px] max-h-[300px]"
-                      key={img.id}
-                      src={`${api}/images/${img?.imageName}`}
-                    />
-                  );
-                })}
-              </TableCell>
             </TableRow>
           </TableBody>
         </Table>
       </div>
       <Dialog open={openAdd} onOpenChange={(e) => setOpenAdd(e)}>
         <DialogContent>
-          <form onSubmit={formikAddImg}>
+          <form onSubmit={handleSubmitAdd}>
             <DialogHeader>
               <DialogTitle>Add Image Modal</DialogTitle>
               <DialogDescription>
@@ -166,21 +153,8 @@ const InfoId = () => {
                 done.
               </DialogDescription>
             </DialogHeader>
-            <div className="flex flex-col gap-2">
-              <Input
-                type={"file"}
-                name="Images"
-                onChange={(e) => {
-                  const file = e.currentTarget.file?.[0];
-
-                  if (file) {
-                    formikAddImg.setFieldValue(
-                      "Images",
-                      e.currentTarget.file[0],
-                    );
-                  }
-                }}
-              />
+            <div className="flex flex-col gap-2 py-4">
+              <Input type="file" name="Images" />
             </div>
             <DialogFooter>
               <DialogClose asChild>
