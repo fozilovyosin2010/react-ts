@@ -6,18 +6,18 @@ interface IarrImg {
   imageName: string;
 }
 
-interface IpostObj {
-  Name: string;
-  Description: string;
-  Images: string;
-}
-
 export interface Idata {
   id: number;
   isCompleted: boolean;
   name: string;
   description: string;
   images: IarrImg[];
+}
+
+interface IputObj {
+  name: "string";
+  description: "string";
+  id: number;
 }
 
 interface Istate {
@@ -68,9 +68,21 @@ export const checkData = createAsyncThunk(
 
 export const postData = createAsyncThunk(
   "userSlice/postData",
-  async (obj: IpostObj, thApi) => {
+  async (obj: unknown, thApi) => {
     try {
       await axios.post(`${Api}/api/to-dos`, obj);
+      thApi.dispatch(getData());
+    } catch (error) {
+      return error;
+    }
+  },
+);
+
+export const putData = createAsyncThunk(
+  "userSlice/putData",
+  async (obj: IputObj, thApi) => {
+    try {
+      await axios.put(`${Api}/api/to-dos`, obj);
       thApi.dispatch(getData());
     } catch (error) {
       return error;
@@ -130,6 +142,7 @@ export const userSlice = createSlice({
       .addCase(checkData.fulfilled, (state) => {
         state.loading = false;
       })
+
       //   post
 
       .addCase(postData.pending, (state) => {
@@ -140,6 +153,19 @@ export const userSlice = createSlice({
         state.error = action.payload;
       })
       .addCase(postData.fulfilled, (state) => {
+        state.loading = false;
+      })
+
+      //   put
+
+      .addCase(putData.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(putData.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(putData.fulfilled, (state) => {
         state.loading = false;
       });
   },

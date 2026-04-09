@@ -44,7 +44,14 @@ import { useDispatch, useSelector } from "react-redux";
 
 import type { AppDispatch, RootState } from "@/Store/store";
 
-import { checkData, delData, getData } from "@/reducers/userSlice";
+import {
+  checkData,
+  delData,
+  getData,
+  postData,
+  putData,
+  type IpostObj,
+} from "@/reducers/userSlice";
 
 const api = "http://37.27.29.18:8001";
 
@@ -120,8 +127,8 @@ const Home = () => {
       formData.append("Description", values.Description.trim());
       formData.append("Images", values.Images);
 
-      usersData.postData(formData);
-
+      // usersData.postData(formData);
+      dispatch(postData(formData));
       resetForm();
       handleCloseAdd();
     },
@@ -150,7 +157,8 @@ const Home = () => {
     },
     validationSchema: userSchemaEdit,
     onSubmit: (val) => {
-      usersData.putData(val);
+      dispatch(putData(val));
+      // usersData.putData(val);
       handleCloseEdit();
     },
   });
