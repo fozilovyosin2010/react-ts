@@ -40,6 +40,12 @@ import { useUser } from "@/Store/useUser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+import { useDispatch, useSelector } from "react-redux";
+
+import type { AppDispatch, RootState } from "@/Store/store";
+
+import { checkData, delData, getData } from "@/reducers/userSlice";
+
 const api = "http://37.27.29.18:8001";
 
 const userSchema = Yup.object({
@@ -59,22 +65,32 @@ interface editObj {
 }
 
 const Home = () => {
+  const users = useSelector((e: RootState) => e.users);
+  // console.log(users.data);
+
+  const dispatch: AppDispatch = useDispatch();
+
   const usersData: any = useUser((state) => state);
 
   useEffect(() => {
-    usersData.getData();
+    // usersData.getData();
+
+    dispatch(getData());
   }, []);
 
   const handleBtnDel = useCallback(
     (id: number) => {
-      usersData.delData(id);
+      // users.delData(id);
+
+      dispatch(delData(id));
     },
     [usersData],
   );
 
   const handleBtnCheck = useCallback(
     (id: number) => {
-      usersData.checkData(id);
+      dispatch(checkData(id));
+      // usersData.checkData(id);
     },
     [usersData],
   );
@@ -176,7 +192,7 @@ const Home = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {usersData?.users.map((e) => {
+            {users?.data.map((e) => {
               return (
                 <TableRow key={e.id}>
                   <TableCell className="font-medium">{e.name}</TableCell>
