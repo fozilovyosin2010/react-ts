@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "./Store/Store";
@@ -6,7 +6,7 @@ import { addData, delData } from "./Reducers/userSlice";
 
 import * as Yup from "yup";
 
-import { Formik, useFormik } from "formik";
+import { useFormik } from "formik";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,14 +18,31 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useUsers } from "./StoreZus/useUsers";
 
 const App = () => {
   const { data } = useSelector((store: RootState) => store.users);
+  const { data2, delData2, addData2 } = useUsers((e) => e);
+
+  const getData = useMemo(() => {
+    return data.map((e) => {
+      const obj = { ...data2.find((elem) => elem.id === e.id) };
+
+      e = {
+        ...e,
+        ...(obj || {}),
+      };
+
+      return e;
+    });
+  }, [data, data2]);
 
   const dispatch = useDispatch();
 
   function handleClickDel(id: number) {
     dispatch(delData(id));
+
+    delData2(id);
   }
 
   const [openAdd, setOpenAdd] = useState(false);
@@ -46,15 +63,23 @@ const App = () => {
       name: "",
     },
     validationSchema: addSchema,
-    onSubmit: (val, { resetForm }) => {
-      const obj = { id: new Date().getTime(), status: false, ...val };
+    onSubmit: (values, { resetForm }) => {
+      const obj = { id: new Date().getTime() };
+      // status: false, ...val
 
-      dispatch(addData(obj));
+      dispatch(addData({ ...obj, ...values }));
+      addData2({ ...obj, status: false });
 
       resetForm();
       hanClickCloseAdd();
     },
   });
+
+  useEffect(() => {
+    console.log(data, data2);
+
+    // console.log(`data:${data}, data2:${data2}`);
+  }, [data, data2]);
 
   return (
     <div className="p-[10px_20px]">
@@ -72,11 +97,14 @@ const App = () => {
           </tr>
         </thead>
         <tbody>
-          {data.map((e) => {
+          {getData.map((e) => {
             return (
               <tr key={e.id}>
                 <td>{e.name}</td>
-                <td>{e.status ? "ACTIVE" : "INACTIVE"}</td>
+                <td>
+                  {/* here */}
+                  {e.status ? "ACTIVE" : "INACTIVE"}
+                </td>
                 <td>
                   <div>
                     <button

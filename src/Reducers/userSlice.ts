@@ -3,6 +3,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 export interface Idata {
   id: number;
   name: string;
+  status?: boolean;
 }
 export interface UserStates {
   data: Idata[];
@@ -25,8 +26,6 @@ export const userSlice = createSlice({
     },
 
     addData: (state, action) => {
-      console.log(action.payload);
-
       state.data = [...state.data, action.payload];
     },
   },
