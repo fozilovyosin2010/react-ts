@@ -4,6 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "./Store/Store";
 import { delData } from "./Reducers/userSlice";
 
+import * as Yup from "yup";
+
+import { Formik, useFormik } from "formik";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,30 +19,41 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Field, FieldGroup } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-
 
 const App = () => {
   const { data } = useSelector((store: RootState) => store.users);
 
   const dispatch = useDispatch();
-  console.log(data);
 
   function handleClickDel(id: number) {
     dispatch(delData(id));
   }
 
-  const [openAdd, setOpenSAdd] = useState(false);
-  function hanClickOpenAdd() {}
+  const [openAdd, setOpenAdd] = useState(false);
+  function hanClickOpenAdd() {
+    setOpenAdd(true);
+  }
+
+  const addSchema = Yup.object({
+    name: Yup.string().required(),
+  });
+
+  const formikAdd = useFormik({
+    initialValues: {
+      name: "",
+    },
+    // validationSchema: addSchema,
+    onSubmit: (val, { resetForm }) => {
+      console.log(val);
+    },
+  });
 
   return (
     <div className="p-[10px_20px]">
       <header className="py-2">
-        <button onClick={hanClickOpenAdd} className="bg-blue-500 text-[#fff]">
+        <Button onClick={hanClickOpenAdd} className="bg-blue-500 text-[#fff]">
           Add
-        </button>
+        </Button>
       </header>
       <table>
         <thead>
@@ -51,7 +66,7 @@ const App = () => {
         <tbody>
           {data.map((e) => {
             return (
-              <tr>
+              <tr key={e.id}>
                 <td>{e.name}</td>
                 <td>{e.status ? "ACTIVE" : "INACTIVE"}</td>
                 <td>
@@ -69,6 +84,32 @@ const App = () => {
           })}
         </tbody>
       </table>
+      <Dialog open={openAdd} onOpenChange={(e) => setOpenAdd(e)}>
+        <DialogContent className="sm:max-w-sm">
+          <form onSubmit={formikAdd.handleSubmit}>
+            <DialogHeader>
+              <DialogTitle>Add </DialogTitle>
+              <DialogDescription>
+                Make changes to your profile here. Click save when you&apos;re
+                done.
+              </DialogDescription>
+            </DialogHeader>
+            <input
+              className="p-[10px_20px]"
+              value={formikAdd.values.name}
+              onChange={formikAdd.handleChange}
+              name="name"
+              placeholder="Name"
+            />
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              <Button type="submit">Add</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
