@@ -3,15 +3,14 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 export interface Idata {
   id: number;
   name: string;
-  status: boolean;
 }
 export interface UserStates {
   data: Idata[];
 }
 const initialState: UserStates = {
   data: [
-    { id: 1, name: "Yosin", status: false },
-    { id: 2, name: "Jordan", status: true },
+    { id: 1, name: "Yosin" },
+    { id: 2, name: "Jordan" },
   ],
 };
 
@@ -26,11 +25,13 @@ export const userSlice = createSlice({
     },
 
     addData: (state, action) => {
+      console.log(action.payload);
+
       state.data = [...state.data, action.payload];
     },
   },
 });
 
-export const { delData } = userSlice.actions;
+export const { delData, addData } = userSlice.actions;
 
 export default userSlice.reducer;

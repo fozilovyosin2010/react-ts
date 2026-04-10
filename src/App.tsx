@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "./Store/Store";
-import { delData } from "./Reducers/userSlice";
+import { addData, delData } from "./Reducers/userSlice";
 
 import * as Yup from "yup";
 
@@ -17,7 +17,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 const App = () => {
@@ -34,17 +33,26 @@ const App = () => {
     setOpenAdd(true);
   }
 
+  function hanClickCloseAdd() {
+    setOpenAdd(false);
+  }
+
   const addSchema = Yup.object({
-    name: Yup.string().required(),
+    name: Yup.string().trim().required("fill the field"),
   });
 
   const formikAdd = useFormik({
     initialValues: {
       name: "",
     },
-    // validationSchema: addSchema,
+    validationSchema: addSchema,
     onSubmit: (val, { resetForm }) => {
-      console.log(val);
+      const obj = { id: new Date().getTime(), status: false, ...val };
+
+      dispatch(addData(obj));
+
+      resetForm();
+      hanClickCloseAdd();
     },
   });
 
@@ -94,13 +102,20 @@ const App = () => {
                 done.
               </DialogDescription>
             </DialogHeader>
-            <input
-              className="p-[10px_20px]"
-              value={formikAdd.values.name}
-              onChange={formikAdd.handleChange}
-              name="name"
-              placeholder="Name"
-            />
+            <div className="py-2">
+              <input
+                onBlur={formikAdd.handleBlur}
+                className="border w-full p-[10px_20px]"
+                value={formikAdd.values.name}
+                onChange={formikAdd.handleChange}
+                name="name"
+                placeholder="Name"
+              />
+            </div>
+
+            {formikAdd.errors.name && formikAdd.touched.name && (
+              <p className="text-[red]">{formikAdd.errors.name}</p>
+            )}
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline">Cancel</Button>
