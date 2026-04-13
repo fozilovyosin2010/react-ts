@@ -3,6 +3,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 interface IinitialState {
   data: Idata[];
+  objInfo: Idata | null;
   isLoad: boolean;
   error: any;
 }
@@ -27,6 +28,7 @@ interface objPost {
 
 const initialState: IinitialState = {
   data: [],
+  objInfo: null,
   isLoad: false,
   error: null,
 };
@@ -43,12 +45,38 @@ export const getData = createAsyncThunk("userSlice/getData", async () => {
   }
 });
 
+export const getById = createAsyncThunk(
+  "userSlice/getById",
+  async (id: number) => {
+    try {
+      const { data } = await axios.get(`${Api}/api/to-dos/${id}`);
+
+      return data.data;
+    } catch (error) {
+      console.error(error);
+
+      return error;
+    }
+  },
+);
+
 export const delData = createAsyncThunk(
   "userSlice/delData",
   async (id: number, { dispatch }) => {
     try {
       await axios.delete(`${Api}/api/to-dos?id=${id}`);
       dispatch(getData());
+    } catch (error) {
+      console.error(error);
+    }
+  },
+);
+
+export const delById = createAsyncThunk(
+  "userSlice/delById",
+  async (imgId: number, { dispatch }) => {
+    try {
+      await axios.delete(`${Api}/api/to-dos/images/${imgId}`);
     } catch (error) {
       console.error(error);
     }
@@ -64,6 +92,25 @@ export const postData = createAsyncThunk(
       dispatch(getData());
     } catch (error) {
       return error;
+    }
+  },
+);
+
+interface postImgObj {
+  id: any;
+  obj: FormData;
+}
+
+export const postImg = createAsyncThunk(
+  "userSlice/postImg",
+  async ({ id, obj }: postImgObj, { dispatch }) => {
+    console.log(obj);
+    try {
+      await axios.post(`${Api}/api/to-dos/${id}/images`, obj);
+
+      dispatch(getById(id));
+    } catch (error) {
+      console.error(error);
     }
   },
 );
@@ -108,6 +155,19 @@ export const userSlice = createSlice({
         state.data = action.payload;
       })
       .addCase(getData.rejected, (state, action) => {
+        state.isLoad = false;
+        state.error = action.payload;
+      })
+      .addCase(getById.pending, (state) => {
+        state.isLoad = true;
+        state.error = null;
+      })
+      .addCase(getById.fulfilled, (state, action) => {
+        state.isLoad = false;
+        state.error = null;
+        state.objInfo = action.payload;
+      })
+      .addCase(getById.rejected, (state, action) => {
         state.isLoad = false;
         state.error = action.payload;
       });

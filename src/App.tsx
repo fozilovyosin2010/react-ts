@@ -4,9 +4,12 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   Api,
   checkData,
+  delById,
   delData,
+  getById,
   getData,
   postData,
+  postImg,
   putData,
 } from "./Reducers/userSlice";
 
@@ -28,19 +31,29 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 
+import { Card, CardContent } from "@/components/ui/card";
+
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import Menu from "./Compos/Menu";
+import { Delete } from "lucide-react";
 
 const App = () => {
-  const { data } = useSelector((e: RootState) => e.users);
+  const { data, objInfo } = useSelector((e: RootState) => e.users);
 
   const disP = useDispatch<AppDispatch>();
 
@@ -138,11 +151,49 @@ const App = () => {
       console.log({ ...values, id: objEdit?.id });
 
       disP(putData({ ...values, id: objEdit?.id }));
+
+      setOpenEdit(false);
     },
   });
 
+  /////info
+
+  const [openInfo, setOpenInfo] = useState(false);
+
+  function hanOpenInfo(id: number) {
+    disP(getById(id));
+    setOpenInfo(true);
+  }
+
+  function hanCloseInfo() {
+    setOpenInfo(false);
+  }
+
+  function hanSubAddImg(e: any) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    console.log(e.target["Images"].files[0]);
+
+    formData.append("Images", e.target["Images"].files[0]);
+    // console.log(Object.fromEntries(formData));
+
+    disP(postImg({ id: objInfo?.id, obj: formData }));
+  }
+  ////info
+
+  const [idxInfo, setIdxInfo] = useState(null);
+  function hanBtnDelId(idx: number, imgId: number) {
+    disP(delById(imgId));
+
+    disP(getById(idx));
+  }
+
   return (
     <div>
+      <div className="header p-[10px_20px] items-center flex justify-between">
+        <Button onClick={hanOpenAdd}>Add</Button>
+      </div>
       <main className="p-[10px_20px]">
         <Table>
           <TableHeader>
@@ -158,8 +209,12 @@ const App = () => {
             {data?.map((e) => {
               return (
                 <TableRow key={e.id}>
-                  <TableCell className="font-medium">{e.name}</TableCell>
-                  <TableCell>{e.description}</TableCell>
+                  <TableCell className="font-medium max-w-[100px] truncate">
+                    {e.name}
+                  </TableCell>
+                  <TableCell className="max-w-[100px] truncate">
+                    {e.description}
+                  </TableCell>
                   <TableCell>
                     <span
                       className={`${e.isCompleted ? "bg-blue-500" : "bg-red-500"} text-[#fff] p-[5px_8px] rounded-[8px] font-[600]`}
@@ -182,6 +237,7 @@ const App = () => {
                       btnDel={hanClDel}
                       btnEdit={hanOpenEdit}
                       btnCheck={hanClChecked}
+                      btnInfo={hanOpenInfo}
                     />
                   </TableCell>
                 </TableRow>
@@ -315,6 +371,95 @@ const App = () => {
               <Button type="submit">Edit</Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+      {/* info modal */}
+      <Dialog open={openInfo} onOpenChange={(e) => setOpenInfo(e)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Info</DialogTitle>
+            <DialogDescription>
+              Make changes to your profile here. Click save when you&apos;re
+              done.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center ">
+            <div>
+              <Carousel className="w-[500px] max-w-[100px] sm:max-w-xs">
+                <CarouselContent className="px-[40px]">
+                  {objInfo?.images?.map((e) => {
+                    return (
+                      <CarouselItem key={e.id}>
+                        <div className="p-1">
+                          <Card>
+                            <CardContent className="flex aspect-square items-center  p-6">
+                              <img
+                                className="w-[400px]"
+                                src={`${Api}/images/${e.imageName}`}
+                                alt=""
+                              />
+                            </CardContent>
+                            <div className="flex justify-center p-[10px_20px]">
+                              <Button
+                                onClick={() => hanBtnDelId(objInfo?.id, e.id)}
+                                variant={"destructive"}
+                              >
+                                <Delete />
+                              </Button>
+                            </div>
+                          </Card>
+                        </div>
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </div>
+
+            <form onSubmit={hanSubAddImg} className="flex gap-3 items-center ">
+              <input
+                name="Images"
+                type="file"
+                className="border p-[5px_10px]"
+                required
+              />
+              <Button type="submit">Add</Button>
+            </form>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium max-w-[100px] truncate">
+                    {objInfo?.name}
+                  </TableCell>
+                  <TableCell className="max-w-[100px] truncate">
+                    {objInfo?.description}
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={`${objInfo?.isCompleted ? "bg-blue-500" : "bg-red-500"} text-[#fff] p-[5px_8px] rounded-[8px] font-[600]`}
+                    >
+                      {objInfo?.isCompleted ? "ACTIVE" : "INACTIVE"}
+                    </span>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="destructive">Close</Button>
+            </DialogClose>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

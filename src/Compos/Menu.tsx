@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { CheckCheckIcon, Edit, Ellipsis } from "lucide-react";
+import { CheckCheckIcon, Delete, Edit, Ellipsis, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Iprops {
@@ -16,12 +16,13 @@ interface Iprops {
   name: string;
   description: string;
   btnDel(id: number): void;
-  btnCheck(id: number): void;
   btnEdit(obj: { id: number; name: string; description: string }): void;
+  btnCheck(id: number): void;
+  btnInfo(id: number): void;
 }
 
 const Menu = React.memo(
-  ({ id, name, description, btnDel, btnCheck, btnEdit }: Iprops) => {
+  ({ id, name, description, btnDel, btnCheck, btnEdit, btnInfo }: Iprops) => {
     const objEdit = { id: id, name: name, description: description };
     return (
       <div>
@@ -47,8 +48,13 @@ const Menu = React.memo(
               <CheckCheckIcon />
               <span>Checked</span>
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => btnInfo(id)}>
+              <Info />
+              <span>Info</span>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => btnDel(id)} variant="destructive">
+              <Delete />
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
