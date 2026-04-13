@@ -8,8 +8,6 @@ import { XIcon } from "lucide-react";
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  console.log("renders");
-
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 

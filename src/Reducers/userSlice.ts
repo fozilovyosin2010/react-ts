@@ -68,12 +68,11 @@ export const postData = createAsyncThunk(
   },
 );
 
-// here
 export const putData = createAsyncThunk(
   "userSlice/putData",
-  async (obj, { dispatch }) => {
+  async (obj: any, { dispatch }) => {
     try {
-      await axios.put(`${Api}/to-dos`, obj);
+      await axios.put(`${Api}/api/to-dos`, obj);
       dispatch(getData());
     } catch (error) {
       console.error(error);
