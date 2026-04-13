@@ -1,36 +1,74 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import axios from "axios";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-export interface Idata {
-  id: number;
-  name: string;
-  status?: boolean;
-}
-export interface UserStates {
+interface IinitialState {
   data: Idata[];
+  isLoad: boolean;
+  error: null | string;
 }
-const initialState: UserStates = {
-  data: [
-    { id: 1, name: "Yosin" },
-    { id: 2, name: "Jordan" },
-  ],
+
+interface Iimages {
+  id: number;
+  imageName: string;
+}
+interface Idata {
+  id: number;
+  isCompleted: boolean;
+  images: Iimages[];
+  name: string;
+  description: string;
+}
+
+const initialState: IinitialState = {
+  data: [],
+  isLoad: false,
+  error: null,
 };
 
-export const userSlice = createSlice({
-  name: "user",
+const Api = "http://37.27.29.18:8001";
 
-  initialState,
+export const getData = createAsyncThunk("userSlice/getData", async () => {
+  try {
+    const { data } = await axios.get(`${Api}/api/to-dos`);
 
-  reducers: {
-    delData: (state, action) => {
-      state.data = state.data.filter((e) => e.id != action.payload);
-    },
-
-    addData: (state, action) => {
-      state.data = [...state.data, action.payload];
-    },
-  },
+    return data.data;
+  } catch (error) {
+    return error;
+  }
 });
 
-export const { delData, addData } = userSlice.actions;
+export const delData = createAsyncThunk(
+  "userSlice/delData",
+  async (id: number, { dispatch }) => {
+    try {
+      await axios.delete(`${Api}/api/to-dos?id=${id}`);
+      dispatch(getData());
+    } catch (error) {
+      console.error(error);
+    }
+  },
+);
+
+export const userSlice = createSlice({
+  name: "userSlice",
+  initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(getData.pending, (state) => {
+        state.isLoad = true;
+        state.error = null;
+      })
+      .addCase(getData.fulfilled, (state, action) => {
+        state.isLoad = false;
+        // state.error = null;
+        state.data = action.payload;
+      })
+      .addCase(getData.rejected, (state, action) => {
+        state.isLoad = false;
+        state.error = action.payload;
+      });
+  },
+});
 
 export default userSlice.reducer;

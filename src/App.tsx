@@ -1,158 +1,135 @@
-import React, { useEffect, useMemo, useState } from "react";
-
+import React, { useEffect, type ActionDispatch } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "./Store/Store";
-import { addData, delData } from "./Reducers/userSlice";
+import type { AppDispatch, RootState } from "./Store/Store";
+import { getData } from "./Reducers/userSlice";
+import { Button } from "./components/ui/button";
 
-import * as Yup from "yup";
-
-import { useFormik } from "formik";
-
-import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useUsers } from "./StoreZus/useUsers";
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const App = () => {
-  const { data } = useSelector((store: RootState) => store.users);
-  const { data2, delData2, addData2 } = useUsers((e) => e);
+  const { data } = useSelector((e: RootState) => e.users);
 
-  const getData = useMemo(() => {
-    return data.map((e) => {
-      const obj = { ...data2.find((elem) => elem.id === e.id) };
-
-      e = {
-        ...e,
-        ...(obj || {}),
-      };
-
-      return e;
-    });
-  }, [data, data2]);
-
-  const dispatch = useDispatch();
-
-  function handleClickDel(id: number) {
-    dispatch(delData(id));
-
-    delData2(id);
-  }
-
-  const [openAdd, setOpenAdd] = useState(false);
-  function hanClickOpenAdd() {
-    setOpenAdd(true);
-  }
-
-  function hanClickCloseAdd() {
-    setOpenAdd(false);
-  }
-
-  const addSchema = Yup.object({
-    name: Yup.string().trim().required("fill the field"),
-  });
-
-  const formikAdd = useFormik({
-    initialValues: {
-      name: "",
-    },
-    validationSchema: addSchema,
-    onSubmit: (values, { resetForm }) => {
-      const obj = { id: new Date().getTime() };
-      // status: false, ...val
-
-      dispatch(addData({ ...obj, ...values }));
-      addData2({ ...obj, status: false });
-
-      resetForm();
-      hanClickCloseAdd();
-    },
-  });
+  const disP = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    console.log(data, data2);
-
-    // console.log(`data:${data}, data2:${data2}`);
-  }, [data, data2]);
-
+    disP(getData());
+  }, []);
   return (
-    <div className="p-[10px_20px]">
-      <header className="py-2">
-        <Button onClick={hanClickOpenAdd} className="bg-blue-500 text-[#fff]">
-          Add
-        </Button>
-      </header>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Status</th>
-            <th>Options</th>
-          </tr>
-        </thead>
-        <tbody>
-          {getData.map((e) => {
-            return (
-              <tr key={e.id}>
-                <td>{e.name}</td>
-                <td>
-                  {/* here */}
-                  {e.status ? "ACTIVE" : "INACTIVE"}
-                </td>
-                <td>
-                  <div>
-                    <button
-                      onClick={() => handleClickDel(e.id)}
-                      className="border border-[red]"
-                    >
-                      Del
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <Dialog open={openAdd} onOpenChange={(e) => setOpenAdd(e)}>
-        <DialogContent className="sm:max-w-sm">
-          <form onSubmit={formikAdd.handleSubmit}>
-            <DialogHeader>
-              <DialogTitle>Add </DialogTitle>
-              <DialogDescription>
-                Make changes to your profile here. Click save when you&apos;re
-                done.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-2">
-              <input
-                onBlur={formikAdd.handleBlur}
-                className="border w-full p-[10px_20px]"
-                value={formikAdd.values.name}
-                onChange={formikAdd.handleChange}
-                name="name"
-                placeholder="Name"
-              />
-            </div>
-
-            {formikAdd.errors.name && formikAdd.touched.name && (
-              <p className="text-[red]">{formikAdd.errors.name}</p>
-            )}
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button type="submit">Add</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+    <div>
+      <div className="header">
+        <div>
+          <input type="text" />
+          <select>
+            <option value="">All</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+        <Button>Add</Button>
+      </div>
+      <main>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Image</th>
+              <th>Options</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.map((e) => {
+              return tr;
+            })}
+          </tbody>
+        </table>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Product</TableHead>
+              <TableHead>Price</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell className="font-medium">Wireless Mouse</TableCell>
+              <TableCell>$29.99</TableCell>
+              <TableCell className="text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="size-8">
+                      <MoreHorizontalIcon />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive">
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Mechanical Keyboard</TableCell>
+              <TableCell>$129.99</TableCell>
+              <TableCell className="text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="size-8">
+                      <MoreHorizontalIcon />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive">
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">USB-C Hub</TableCell>
+              <TableCell>$49.99</TableCell>
+              <TableCell className="text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="size-8">
+                      <MoreHorizontalIcon />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive">
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </main>
     </div>
   );
 };
