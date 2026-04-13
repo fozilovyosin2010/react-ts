@@ -4,7 +4,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 interface IinitialState {
   data: Idata[];
   isLoad: boolean;
-  error: null | string;
+  error: any;
 }
 
 interface Iimages {
@@ -19,13 +19,19 @@ interface Idata {
   description: string;
 }
 
+interface objPost {
+  Name: string;
+  Description: string;
+  Images: string;
+}
+
 const initialState: IinitialState = {
   data: [],
   isLoad: false,
   error: null,
 };
 
-const Api = "http://37.27.29.18:8001";
+export const Api = "http://37.27.29.18:8001";
 
 export const getData = createAsyncThunk("userSlice/getData", async () => {
   try {
@@ -49,6 +55,44 @@ export const delData = createAsyncThunk(
   },
 );
 
+export const postData = createAsyncThunk(
+  "userSlice/postData",
+  async (obj: any, { dispatch }) => {
+    try {
+      await axios.post(`${Api}/api/to-dos`, obj);
+
+      dispatch(getData());
+    } catch (error) {
+      return error;
+    }
+  },
+);
+
+// here
+export const putData = createAsyncThunk(
+  "userSlice/putData",
+  async (obj, { dispatch }) => {
+    try {
+      await axios.put(`${Api}/to-dos`, obj);
+      dispatch(getData());
+    } catch (error) {
+      console.error(error);
+    }
+  },
+);
+
+export const checkData = createAsyncThunk(
+  "userSlice/checkData",
+  async (id: number, { dispatch }) => {
+    try {
+      await axios.put(`${Api}/completed?id=${id}`);
+      dispatch(getData());
+    } catch (error) {
+      console.error(error);
+    }
+  },
+);
+
 export const userSlice = createSlice({
   name: "userSlice",
   initialState,
@@ -61,7 +105,7 @@ export const userSlice = createSlice({
       })
       .addCase(getData.fulfilled, (state, action) => {
         state.isLoad = false;
-        // state.error = null;
+        state.error = null;
         state.data = action.payload;
       })
       .addCase(getData.rejected, (state, action) => {
