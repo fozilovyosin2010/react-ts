@@ -1,6 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-import { CheckCheckIcon, Delete, Edit, MoreHorizontalIcon } from "lucide-react";
+import {
+  CheckCheckIcon,
+  Delete,
+  Edit,
+  Info,
+  MoreHorizontalIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,6 +28,14 @@ import {
 } from "@/components/ui/dialog";
 
 import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+
+import {
   Table,
   TableBody,
   TableCell,
@@ -30,7 +44,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { Card, CardContent } from "@/components/ui/card";
+
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
+
 import {
   checkData,
   delData,
@@ -39,7 +56,12 @@ import {
   postData,
   putData,
   todo,
+  infoIdx,
   type IObjTodo,
+  ObjInfo,
+  getById,
+  delById,
+  postImgdata,
 } from "./Store/atoms";
 import { Spinner } from "./components/ui/spinner";
 import { useFormik } from "formik";
@@ -148,7 +170,7 @@ const App = () => {
     onSubmit: (values, { resetForm }) => {
       putUser({ ...values, id: objEdit?.id });
 
-      setOpenEdit(false);
+      hanCloseEdit();
 
       resetForm();
     },
@@ -173,6 +195,27 @@ const App = () => {
       description: "",
     });
     setOpenEdit(false);
+  }
+
+  /////info
+  const [openInfo, setOpenInfo] = useState(false);
+
+  const [userId, setUserId] = useAtom(infoIdx);
+  const [userObjInfo, setUserObjInfo] = useAtom(ObjInfo);
+
+  const userById = useSetAtom(getById);
+
+  const delImg = useSetAtom(delById);
+
+  function hanClOpenInfo(id: number) {
+    setOpenInfo(true);
+
+    setUserId(id);
+    userById();
+  }
+
+  function hanBtnDelId(imgId: number) {
+    delImg(imgId);
   }
 
   return (
@@ -231,7 +274,7 @@ const App = () => {
                   <TableCell>
                     <img
                       className="w-[150px]"
-                      src={`${Api}/images/${e.images?.[0].imageName}`}
+                      src={`${Api}/images/${e?.images?.[0]?.imageName}`}
                       alt=""
                     />
                   </TableCell>
@@ -246,6 +289,10 @@ const App = () => {
                         <DropdownMenuItem onClick={() => hanClCheck(e.id)}>
                           <CheckCheckIcon className="stroke-[green]" />
                           Checked
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => hanClOpenInfo(e.id)}>
+                          <Info className="stroke-[brown]" />
+                          Info
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => hanClOpenEdit(e)}>
                           <Edit className="stroke-[blue]" />
@@ -307,6 +354,7 @@ const App = () => {
                   onBlur={formikAdd.handleBlur}
                   type="text"
                   name="Description"
+                  placeholder="Description"
                 />
               </div>
               <div>
@@ -386,6 +434,96 @@ const App = () => {
               <Button type="submit">Edit</Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* info modal */}
+      <Dialog open={openInfo} onOpenChange={(e) => setOpenInfo(e)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Info</DialogTitle>
+            <DialogDescription>
+              Make changes to your profile here. Click save when you&apos;re
+              done.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center ">
+            <div>
+              <Carousel className="w-[500px] max-w-[100px] sm:max-w-xs">
+                <CarouselContent className="px-[40px]">
+                  {userObjInfo?.images?.map((e) => {
+                    return (
+                      <CarouselItem key={e.id}>
+                        <div className="p-1">
+                          <Card>
+                            <CardContent className="flex aspect-square items-center  p-6">
+                              <img
+                                className="w-[400px]"
+                                src={`${Api}/images/${e.imageName}`}
+                                alt=""
+                              />
+                            </CardContent>
+                            <div className="flex justify-center p-[10px_20px]">
+                              <Button
+                                onClick={() => hanBtnDelId(e.id)}
+                                variant={"destructive"}
+                              >
+                                <Delete />
+                              </Button>
+                            </div>
+                          </Card>
+                        </div>
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </div>
+
+            <form className="flex gap-3 items-center ">
+              <input
+                name="Images"
+                type="file"
+                className="border p-[5px_10px]"
+                required
+              />
+              <Button type="submit">Add</Button>
+            </form>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium max-w-[100px] truncate">
+                    {userObjInfo?.name}
+                  </TableCell>
+                  <TableCell className="max-w-[100px] truncate">
+                    {userObjInfo?.description}
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={`${userObjInfo?.isCompleted ? "bg-blue-500" : "bg-red-500"} text-[#fff] p-[5px_8px] rounded-[8px] font-[600]`}
+                    >
+                      {userObjInfo?.isCompleted ? "ACTIVE" : "INACTIVE"}
+                    </span>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="destructive">Close</Button>
+            </DialogClose>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
