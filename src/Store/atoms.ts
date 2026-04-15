@@ -86,6 +86,7 @@ export const postData = atom(null, async (get, set, obj) => {
   }
 });
 
+// here
 export const postImgdata = atom(null, async (get, set, obj) => {
   const idx = get(infoIdx);
 

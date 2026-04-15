@@ -206,6 +206,7 @@ const App = () => {
   const userById = useSetAtom(getById);
 
   const delImg = useSetAtom(delById);
+  const userPostImg = useSetAtom(postImgdata);
 
   function hanClOpenInfo(id: number) {
     setOpenInfo(true);
@@ -214,33 +215,28 @@ const App = () => {
     userById();
   }
 
+  useEffect(() => {
+    if (userId !== null) {
+      userById();
+    }
+  }, [userId]);
+
   function hanBtnDelId(imgId: number) {
     delImg(imgId);
   }
 
+  function hanSubAddImg(e: any) {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("Images", e.target["Images"].files[0]);
+
+    userPostImg(formData);
+    e.target["Images"].value = "";
+  }
+
   return (
     <div>
-      <div className="header p-[10px_20px] flex justify-between items-center">
-        <div className="flex gap-3 items-center">
-          <input
-            type="text"
-            placeholder="Search name"
-            className="p-[5px_10px] placeholder:text-[15px] font-medium rounded-[8px] border"
-          />
-          <Select>
-            <SelectTrigger className="w-full max-w-48">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Status</SelectLabel>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="true">Active</SelectItem>
-                <SelectItem value="false">Inactive</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="header p-[10px_20px] ">
         <Button onClick={hanClOpenAdd}>Add</Button>
       </div>
       <div className="px-[20px]">
@@ -448,41 +444,43 @@ const App = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center ">
-            <div>
-              <Carousel className="w-[500px] max-w-[100px] sm:max-w-xs">
-                <CarouselContent className="px-[40px]">
-                  {userObjInfo?.images?.map((e) => {
-                    return (
-                      <CarouselItem key={e.id}>
-                        <div className="p-1">
-                          <Card>
-                            <CardContent className="flex aspect-square items-center  p-6">
-                              <img
-                                className="w-[400px]"
-                                src={`${Api}/images/${e.imageName}`}
-                                alt=""
-                              />
-                            </CardContent>
-                            <div className="flex justify-center p-[10px_20px]">
-                              <Button
-                                onClick={() => hanBtnDelId(e.id)}
-                                variant={"destructive"}
-                              >
-                                <Delete />
-                              </Button>
-                            </div>
-                          </Card>
-                        </div>
-                      </CarouselItem>
-                    );
-                  })}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-              </Carousel>
-            </div>
+            {userObjInfo ? (
+              <div className="carousel pt-[20px] pb-[40px]">
+                <Carousel className="w-[500px] max-w-[100px] sm:max-w-xs">
+                  <CarouselContent className="px-[40px]">
+                    {userObjInfo?.images?.map((e) => {
+                      return (
+                        <CarouselItem key={e.id}>
+                          <div className="p-1">
+                            <Card>
+                              <CardContent className="flex aspect-square items-center  p-6">
+                                <img
+                                  className="w-[400px]"
+                                  src={`${Api}/images/${e.imageName}`}
+                                  alt=""
+                                />
+                              </CardContent>
+                              <div className="flex justify-center p-[10px_20px]">
+                                <Button
+                                  onClick={() => hanBtnDelId(e.id)}
+                                  variant={"destructive"}
+                                >
+                                  <Delete />
+                                </Button>
+                              </div>
+                            </Card>
+                          </div>
+                        </CarouselItem>
+                      );
+                    })}
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </Carousel>
+              </div>
+            ) : null}
 
-            <form className="flex gap-3 items-center ">
+            <form onSubmit={hanSubAddImg} className="flex gap-3 items-center ">
               <input
                 name="Images"
                 type="file"
@@ -492,7 +490,7 @@ const App = () => {
               <Button type="submit">Add</Button>
             </form>
 
-            <Table>
+            <Table className="my-4">
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
