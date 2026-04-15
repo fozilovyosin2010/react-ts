@@ -51,17 +51,18 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   checkData,
   delData,
-  getData,
-  loadTodo,
+  // getData,
+  // loadTodo,
   postData,
   putData,
-  todo,
+  // todo,
   infoIdx,
   type IObjTodo,
   ObjInfo,
   getById,
   delById,
   postImgdata,
+  getLoadData,
 } from "./Store/atoms";
 import { Spinner } from "./components/ui/spinner";
 import { useFormik } from "formik";
@@ -78,18 +79,20 @@ import {
 export const Api = "http://37.27.29.18:8001";
 
 const App = () => {
-  const [users] = useAtom(todo);
-  const loader = useAtomValue(loadTodo);
+  // const [users] = useAtom(todo);
+  const [users] = useAtom<any>(getLoadData);
+  console.log(users);
 
-  const getUser = useSetAtom(getData);
+  // const loader = useAtomValue(loadTodo);
+
   const delUser = useSetAtom(delData);
   const checkUser = useSetAtom(checkData);
   const postUser = useSetAtom(postData);
   const putUser = useSetAtom(putData);
 
-  useEffect(() => {
-    getUser();
-  }, [getData]);
+  // useEffect(() => {
+  //   getUser();
+  // }, [getData]);
 
   function hanClDel(id: number) {
     delUser(id);
@@ -251,7 +254,7 @@ const App = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users?.map((e) => {
+            {users?.data?.map((e) => {
               return (
                 <TableRow key={e.id}>
                   <TableCell className="max-w-[120px] truncate font-medium">
@@ -525,7 +528,7 @@ const App = () => {
         </DialogContent>
       </Dialog>
 
-      {loader ? (
+      {users.state === "loading" ? (
         <div className="flex justify-center py-4">
           <div className="flex items-center gap-4">
             <Spinner />
