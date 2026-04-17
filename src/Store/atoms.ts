@@ -16,15 +16,12 @@ export interface IObjTodo {
   description: string;
 }
 
-// export const todo = atom<IObjTodo[]>([]);
-
-// export const errorTodo = atom(null);
-// export const loadTodo = atom(false);
-
 export const infoIdx = atom<null | number>(null);
 export const ObjInfo = atom<null | IObjTodo>(null);
 
 const trigger = atom(false);
+const triggerId = atom(false);
+
 // here
 const getData = atom(async (get, set) => {
   // if trigger changes the func will run again

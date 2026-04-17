@@ -79,20 +79,13 @@ import {
 export const Api = "http://37.27.29.18:8001";
 
 const App = () => {
-  // const [users] = useAtom(todo);
   const [users] = useAtom<any>(getLoadData);
   console.log(users);
-
-  // const loader = useAtomValue(loadTodo);
 
   const delUser = useSetAtom(delData);
   const checkUser = useSetAtom(checkData);
   const postUser = useSetAtom(postData);
   const putUser = useSetAtom(putData);
-
-  // useEffect(() => {
-  //   getUser();
-  // }, [getData]);
 
   function hanClDel(id: number) {
     delUser(id);
