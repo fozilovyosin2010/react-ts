@@ -1,1 +1,11 @@
 @import "tailwindcss";
+table tr,
+th,
+td {
+  border: 1px solid;
+}
+
+table {
+  margin-top: 30px;
+  padding: 10px 20px;
+}
